@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/JavCast03/proyectoGSASD#readme",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
   }
 }
