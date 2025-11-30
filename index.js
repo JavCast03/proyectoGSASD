@@ -29,25 +29,37 @@ let idUsuarioMemoria = 1;
 
 // ------------------- Inicializar Base de Datos -------------------
 async function initDb() {
-  if (!useDb) return;
+  if (!useDb) {
+    console.log("Sin DATABASE_URL, no se inicializa BBDD (modo memoria).");
+    return;
+  }
 
+  // Crear tabla de usuarios si no existe
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       username TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL
     );
+  `);
 
+  // Crear tabla de tareas si no existe (versión básica)
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS tareas (
       id SERIAL PRIMARY KEY,
-      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       texto TEXT NOT NULL,
       completada BOOLEAN NOT NULL DEFAULT FALSE,
       creada_en TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
 
-  console.log("Tablas users y tareas listas.");
+  // Asegurarnos de que la tabla tareas tiene la columna user_id
+  await pool.query(`
+    ALTER TABLE tareas
+    ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
+  `);
+
+  console.log("Tablas users y tareas listas (con columna user_id).");
 }
 
 // ------------------- Middleware -------------------
